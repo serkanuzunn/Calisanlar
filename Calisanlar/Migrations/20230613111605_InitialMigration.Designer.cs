@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Calisanlar.Migrations
 {
-    [DbContext(typeof(CalisanContext))]
+    [DbContext(typeof(EmployeeContext))]
     [Migration("20230613111605_InitialMigration")]
     partial class InitialMigration
     {

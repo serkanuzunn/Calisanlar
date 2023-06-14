@@ -27,11 +27,11 @@ namespace Calisanlar
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<CalisanContext>(option => option.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<EmployeeContext>(option => option.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             
             services.AddControllers();
 
-            services.AddScoped<ICalisanRepo,SqlCalisanRepo>();
+            services.AddScoped<IEmployeeRepo,SqlEmployeeRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

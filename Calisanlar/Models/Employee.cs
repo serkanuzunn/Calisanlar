@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Calisanlar.Models
 {
-    public class Calisan
+    public class Employee
     {
         [Key]
         public int Id { get; set; }
         public string AdSoyad { get; set; }
         public string SicilNo { get; set; }
-        public List<Calisan> Astlar { get; set; }
-        public Calisan Ust { get; set; }
+        public List<Employee> Astlar { get; set; }
+        public Employee Ust { get; set; }
     }
 }
