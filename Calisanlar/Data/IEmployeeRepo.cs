@@ -1,4 +1,4 @@
-﻿using Calisanlar.Models;
+﻿using Employees.Models;
 using System.Collections.Generic;
 
 namespace Calisanlar.Data

@@ -1,4 +1,4 @@
-﻿using Calisanlar.Models;
+﻿using Employees.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Calisanlar.Data

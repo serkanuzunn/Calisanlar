@@ -1,36 +1,42 @@
-﻿using Calisanlar.Data;
-using Calisanlar.Models;
+﻿using AutoMapper;
+using Calisanlar.Data;
+using Employees.Dtos;
+using Employees.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Calisanlar.Controllers
+namespace Employees.controller
 {
     [ApiController]
+    [Route("api/employees")]
     public class EmployeeController:ControllerBase
     {
         private IEmployeeRepo _repository;
+        private readonly IMapper _mapper;
 
-        public EmployeeController(IEmployeeRepo repository)
+        public EmployeeController(IEmployeeRepo repository,IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
-        private object GetEmployeeTree(Employee employee)
+        private EmployeeReadDto GetEmployeeTree(EmployeeReadDto employeeReadDto)
         {
-            var tree = new
+            var tree = new EmployeeReadDto
             {
-                AdSoyad = employee.AdSoyad,
-                SicilNo = employee.SicilNo,
-                Astlar = new List<object>()
+                Id = employeeReadDto.Id,
+                AdSoyad = employeeReadDto.AdSoyad,
+                SicilNo = employeeReadDto.SicilNo,
+                Astlar = new List<EmployeeReadDto>()
             };
 
-            if (employee.Astlar != null)
+            if (employeeReadDto.Astlar != null)
             {
-                foreach (var ast in employee.Astlar)
+                foreach (var ast in employeeReadDto.Astlar)
                 {
                     var astTree = GetEmployeeTree(ast);
-                    ((List<object>)tree.Astlar).Add(astTree);
+                    tree.Astlar.Add(astTree);
                 }
             }
 
@@ -38,38 +44,64 @@ namespace Calisanlar.Controllers
         }
 
 
+
         [HttpGet]
-        public ActionResult<IEnumerable<Employee>> GetAllEmployees()
+        public ActionResult<IEnumerable<EmployeeReadDto>> GetAllEmployees()
         {
             var rootEmployees = _repository.GetAllEmployees().ToList();
-            List<object> employeeTree = new List<object>();
+            var employeeTree = new List<EmployeeReadDto>();
             foreach (var employee in rootEmployees)
             {
-                var tree = GetEmployeeTree(employee);
+                var employeeReadDto = _mapper.Map<EmployeeReadDto>(employee);
+                var tree = GetEmployeeTree(employeeReadDto);
                 employeeTree.Add(tree);
+
             }
 
             return Ok(employeeTree);
         }
 
+        //[HttpPost]
+        //public ActionResult<EmployeeCreateDto> CreateEmployee (EmployeeCreateDto employeeCreateDto)
+        //{
+        //    var employeeModel=_mapper.Map<Employee>(employeeCreateDto);
+        //    if (!ModelState.IsValid)
+        //        return BadRequest("Invalid data");
+
+        //    if (employeeModel.SicilNo.Length != 11 || !employeeModel.SicilNo.All(char.IsLetterOrDigit))
+        //        return BadRequest("Invalid Sicil No");
+
+        //    _repository.CreateEmployee(employeeModel);
+        //    _repository.SaveChanges();
+
+        //    var employeeReadDto=_mapper.Map<EmployeeReadDto>(employeeModel);
+
+        //    return Ok(employeeReadDto);
+        //}
+
         [HttpPost]
-        public ActionResult<Employee> CreateEmployee (Employee employee)
+        public ActionResult<EmployeeReadDto> CreateEmployee(EmployeeCreateDto employeeCreateDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest("Invalid data");
 
-            if (employee.SicilNo.Length != 11 || !employee.SicilNo.All(char.IsLetterOrDigit))
+            if (employeeCreateDto.SicilNo.Length != 11 || !employeeCreateDto.SicilNo.All(char.IsLetterOrDigit))
                 return BadRequest("Invalid Sicil No");
 
-            _repository.CreateEmployee(employee);
+            var employeeModel = _mapper.Map<Employee>(employeeCreateDto);
+            _repository.CreateEmployee(employeeModel);
             _repository.SaveChanges();
-            
-            return Ok();
+
+            var employeeReadDto = _mapper.Map<EmployeeReadDto>(employeeModel);
+
+            return Ok(employeeReadDto);
         }
+
+
 
 
         [HttpPut("{id}")]
-        public ActionResult UpdateEmployee(int id, Employee employee) 
+        public ActionResult UpdateEmployee(int id, EmployeeUpdateDto employeeUpdateDto) 
         {
             if (!ModelState.IsValid)
                 return BadRequest("Invalid data");
@@ -79,27 +111,29 @@ namespace Calisanlar.Controllers
             if (existingEmployee == null)
                 return BadRequest();
 
-            existingEmployee.AdSoyad = employee.AdSoyad;
-            existingEmployee.Astlar = employee.Astlar;
-            existingEmployee.Ust = employee.Ust;
+            //existingEmployee.AdSoyad = employee.AdSoyad;
+            //existingEmployee.Astlar = employee.Astlar;
+            //existingEmployee.Ust = employee.Ust;
 
+
+            _mapper.Map(employeeUpdateDto, existingEmployee);
             _repository.UpdateEmployee(existingEmployee);
             _repository.SaveChanges();
 
-            return Ok();
+            return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public ActionResult DeleteEmployee(int id)
-        {
-            var existingEmployee=_repository.GetEmployeeById(id);
-            if (existingEmployee == null)
-                return BadRequest();
+        //[HttpDelete("{id}")]
+        //public ActionResult DeleteEmployee(int id)
+        //{
+        //    var existingEmployee=_repository.GetEmployeeById(id);
+        //    if (existingEmployee == null)
+        //        return BadRequest();
 
-            _repository.DeleteEmployee(existingEmployee);
-            _repository.SaveChanges();
+        //    _repository.DeleteEmployee(existingEmployee);
+        //    _repository.SaveChanges();
 
-            return Ok();
-        }
+        //    return Ok();
+        //}
     }
 }

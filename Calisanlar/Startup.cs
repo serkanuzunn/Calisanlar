@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +29,14 @@ namespace Calisanlar
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<EmployeeContext>(option => option.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            
-            services.AddControllers();
+
+            services.AddControllers()
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                });
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<IEmployeeRepo,SqlEmployeeRepo>();
         }
